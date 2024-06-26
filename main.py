@@ -1,4 +1,6 @@
 import requests
+import hashlib
+import time
 
 KEYCLOAK_USERNAME = 'admin'
 KEYCLOAK_PASSWORD = 'admin'
@@ -103,11 +105,25 @@ def update_jasper_group_list(session_id, groups):
     else:
         print(f'JasperServer: Failed to update List of Values: {JASPER_RESOURCE_ID}. Status code: {response.status_code}')
 
+def compute_groups_hash(groups):
+    groups_str = str(groups)
+    return hashlib.sha256(groups_str.encode('utf-8')).hexdigest()
 
 if __name__ == "__main__":
-    keycloak_token = get_keycloak_token()
-    jasper_token = get_jasperserver_token()
-    groups = get_keycloak_groups(keycloak_token)
-
-    if keycloak_token and jasper_token and groups:
-        update_jasper_group_list(jasper_token, groups)
+    last_known_hash = None
+    while True:
+        keycloak_token = get_keycloak_token()
+        jasper_token = get_jasperserver_token()
+        if keycloak_token and jasper_token:
+            groups = get_keycloak_groups(keycloak_token)
+            if groups:
+                current_hash = compute_groups_hash(groups)
+                if last_known_hash != current_hash:
+                    print('Changes detected in Keycloak groups, updating JasperServer...')
+                    update_jasper_group_list(jasper_token, groups)
+                    last_known_hash = current_hash
+                else:
+                    print('No changes detected in Keycloak groups.')
+        else:
+            print('Failed to obtain tokens')
+        time.sleep(300)
