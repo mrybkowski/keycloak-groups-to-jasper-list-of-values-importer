@@ -1,15 +1,18 @@
+import os
 import requests
 import hashlib
 import time
 
-KEYCLOAK_USERNAME = 'admin'
-KEYCLOAK_PASSWORD = 'admin'
+KEYCLOAK_USERNAME = os.environ.get("KEYCLOAK_USERNAME")
+KEYCLOAK_PASSWORD = os.environ.get("KEYCLOAK_PASSWORD")
 KEYCLOAK_REALM_NAME = 'tef'
-JASPER_PASSWORD = 'jasperadmin'
-JASPER_USERNAME = 'jasperadmin'
-KEYCLOAK_BASE_URL = 'http://ems2tstkl.servis.justice.cz'
-JASPER_SERVER_API_URL = 'http://ems2tstjasper.servis.justice.cz/jasperserver/rest_v2'
-JASPER_RESOURCE_ID = 'GroupList'
+KEYCLOAK_BASE_URL = os.environ.get("KEYCLOAK_BASE_URL")
+
+JASPER_PASSWORD = os.environ.get("JASPER_PASSWORD")
+JASPER_USERNAME = os.environ.get("JASPER_USERNAME")
+JASPER_BASE_URL = os.environ.get("JASPER_BASE_URL")
+JASPER_SERVER_API_URL = f'https://{JASPER_BASE_URL}/jasperserver/rest_v2'
+JASPER_RESOURCE_ID = os.environ.get("JASPER_GROUP_LIST", "GroupsList")
 JASPER_SUBFOLDER_PATH = 'EM/Lists'
 
 def get_keycloak_token():
@@ -127,3 +130,4 @@ if __name__ == "__main__":
         else:
             print('Failed to obtain tokens')
         time.sleep(300)
+        
